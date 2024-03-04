@@ -3,14 +3,16 @@ import { IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
 
 @Injectable()
 export class CreatePostDto {
-    // 最大长度
+    /**
+     * MaxLength  最大长度
+     * IsNotEmpty 非空
+     * IsOptional 可选
+     */
     @MaxLength(255, {
         always: true,
         message: '帖子标题长度最大为$constraint1',
     })
-    // IsNotEmpty非空
     @IsNotEmpty({ groups: ['create'], message: '帖子标题必须填写' })
-    // IsOptional可选
     @IsOptional({ groups: ['update'] })
     title: string;
 

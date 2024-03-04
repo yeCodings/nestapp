@@ -5,6 +5,7 @@ import {
     Get,
     NotFoundException,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     ValidationPipe,
@@ -14,6 +15,7 @@ import { isNil } from 'lodash';
 
 import { CreatePostDto } from '../dots/crete-post.dto';
 import { UpdatePostDto } from '../dots/update-post.dto';
+import { PostService } from '../services/post-service';
 import { PostEntity } from '../types';
 
 let posts: PostEntity[] = [
@@ -27,18 +29,19 @@ let posts: PostEntity[] = [
 
 @Controller('posts')
 export class PostController {
+    // 在控制器中通过依赖注入的方式使用该服务了，比如通过constructor注入
+    constructor(private postService: PostService) {}
+
     // 获取所有帖子数据(@Get用于获取数据)
     @Get()
     async index() {
-        return posts;
+        return this.postService.findAll();
     }
 
     // 获取ID为id的帖数据
     @Get(':id')
-    async show(@Param('id') id: number) {
-        const post = posts.find((item) => item.id === Number(id));
-        if (isNil(post)) throw new NotFoundException(`the post with id ${id} not exits!`);
-        return post;
+    async show(@Param('id', new ParseIntPipe()) id: number) {
+        return this.postService.findOne(id);
     }
 
     // 新增帖子(@Post用于新增数据)
@@ -56,18 +59,11 @@ export class PostController {
         )
         data: CreatePostDto,
     ) {
-        // 新帖子的id在原来最大的id帖子上加一，添加到posts
-        const newPost: PostEntity = {
-            id: Math.max(...posts.map(({ id }) => id + 1)),
-            ...data,
-        };
-        posts.push(newPost);
-        return newPost;
+        return this.postService.create(data);
     }
 
     // 更新当前id的帖子数据(@Patch用于更新部分数据)
     @Patch()
-    // 接收一个PostEntity类型的请求体数据
     async update(
         @Body(
             new ValidationPipe({
@@ -78,31 +74,26 @@ export class PostController {
                 groups: ['update'],
             }),
         )
-        { id, ...data }: UpdatePostDto,
+        data: UpdatePostDto,
     ) {
-        // 在posts数组中查找与请求数据id匹配的项
-        let toUpdate = posts.find((item) => item.id === Number(id));
-        // 如果找不到匹配项，抛出NotFoundException异常
-        if (isNil(toUpdate)) throw new NotFoundException(`the post with id ${id} not exits!`);
-        // 将找到的项与请求数据合并
-        toUpdate = { ...toUpdate, ...data };
-        // 更新posts数组中的对应项
-        posts = posts.map((item) => (item.id === Number(id) ? toUpdate : item));
-        // 返回更新后的项
-        return toUpdate;
+        return this.postService.update(data);
     }
 
-    // 删除帖子数据
-    @Delete(':id') // 使用HTTP DELETE方法，参数为id
-    // 接收一个名为id的参数，类型为number
+    // 删除帖子数据,使用HTTP DELETE方法，参数为id
+    @Delete(':id')
+    /**
+     * 接收一个名为id的参数，类型为number,在posts数组中查找与请求数据id匹配的项
+     * 如果找不到匹配项，抛出NotFoundException异常
+     * 从posts数组中删除对应的项
+     * 返回被删除的项
+     */
     async delete(@Param('id') id: number) {
-        // 在posts数组中查找与请求数据id匹配的项
         const toDelete = posts.find((item) => item.id === Number(id));
-        // 如果找不到匹配项，抛出NotFoundException异常
+
         if (isNil(toDelete)) throw new NotFoundException(`the post with id ${id} not exits!`);
-        // 从posts数组中删除对应的项
+
         posts = posts.filter((item) => item.id !== Number(id));
-        // 返回被删除的项
+
         return toDelete;
     }
 }

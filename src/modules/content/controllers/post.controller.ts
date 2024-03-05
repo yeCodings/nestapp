@@ -82,12 +82,13 @@ export class PostController {
     // 删除帖子数据,使用HTTP DELETE方法，参数为id
     @Delete(':id')
     /**
+     * Param定义内置 ParseInt 管道
      * 接收一个名为id的参数，类型为number,在posts数组中查找与请求数据id匹配的项
      * 如果找不到匹配项，抛出NotFoundException异常
      * 从posts数组中删除对应的项
      * 返回被删除的项
      */
-    async delete(@Param('id') id: number) {
+    async delete(@Param('id', new ParseIntPipe()) id: number) {
         const toDelete = posts.find((item) => item.id === Number(id));
 
         if (isNil(toDelete)) throw new NotFoundException(`the post with id ${id} not exits!`);

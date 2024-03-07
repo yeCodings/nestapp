@@ -1,9 +1,11 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 
+import { EighthService } from '../services/eighth.service';
 import { FifthService } from '../services/fifth.service';
 import { FirstService } from '../services/first.service';
 import { FourthService } from '../services/fourth.service';
 import { SecondService } from '../services/second.service';
+import { SeventhService } from '../services/seventh.service';
 
 @Controller('test')
 export class TestController {
@@ -14,6 +16,8 @@ export class TestController {
         @Inject('ALIAS-EXAMPLE') private asExp: FirstService,
         @Inject('ASYNC-EXAMPLE') private acExp: SecondService,
         private fifth: FifthService,
+        private seventh: SeventhService,
+        private eighth: EighthService,
     ) {}
 
     @Get('value')
@@ -44,5 +48,13 @@ export class TestController {
     @Get('circular')
     async useCircular() {
         return this.fifth.circular();
+    }
+
+    @Get('scope')
+    async echoScope() {
+        await this.eighth.echo();
+        await this.seventh.add();
+        console.log(`in controller: ${await this.seventh.find()}`);
+        return 'Scope Test';
     }
 }

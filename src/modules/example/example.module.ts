@@ -7,6 +7,8 @@ import { FourthService } from './services/fourth.service';
 import { SecondService } from './services/second.service';
 import { SixthService } from './services/sixth.service';
 import { ThirdService } from './services/third.service';
+import { SeventhService } from './services/seventh.service';
+import { EighthService } from './services/eighth.service';
 
 const firstObject = {
     useValue: () => 'useValue提供者',
@@ -50,6 +52,8 @@ const firstInstance = new FirstService();
         },
         FifthService,
         SixthService,
+        SeventhService,
+        EighthService,
     ],
     controllers: [TestController],
 })

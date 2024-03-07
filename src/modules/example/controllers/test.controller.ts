@@ -1,5 +1,7 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 
+import { ConfigService } from '@/modules/core/services/config.service';
+
 import { EighthService } from '../services/eighth.service';
 import { FifthService } from '../services/fifth.service';
 import { FirstService } from '../services/first.service';
@@ -18,6 +20,7 @@ export class TestController {
         private fifth: FifthService,
         private seventh: SeventhService,
         private eighth: EighthService,
+        private configService: ConfigService,
     ) {}
 
     @Get('value')
@@ -56,5 +59,10 @@ export class TestController {
         await this.seventh.add();
         console.log(`in controller: ${await this.seventh.find()}`);
         return 'Scope Test';
+    }
+
+    @Get('name')
+    async name() {
+        return this.configService.get('name');
     }
 }
